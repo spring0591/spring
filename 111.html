@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        :root { --primary-bg: #ffe6f2; }
+        body {
+            background: var(--primary-bg);
+            transition: background 1s;
+            font-family: '微软雅黑';
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        /* 抽奖区域样式 */
+        .lottery-box {
+            background: rgba(255,255,255,0.8);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        /* 历史轴线样式 */
+        .timeline {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+            margin: 40px 0;
+        }
+        /* 信息面板样式 */
+        .info-panel {
+            background: rgba(255,255,255,0.9);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+        /* 人物卡片样式 */
+        .figure-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 抽奖模块 -->
+        <div class="lottery-box">
+            <h1 style="color: #e91e63;">时空穿越抽奖器</h1>
+            <button onclick="startLottery()" 
+                    style="padding: 12px 30px; background: #ff4081; color: white; border: none; border-radius: 25px;">
+                启动时空漩涡
+            </button>
+            <div id="nameDisplay" style="font-size: 2.5em; margin: 30px; color: #2196F3;"></div>
+        </div>
+
+        <!-- 历史轴线 -->
+        <div class="timeline" id="timeline"></div>
+
+        <!-- 朝代信息面板 -->
+        <div class="info-panel" id="dynastyInfo"></div>
+    </div>
+
+<script>
+// 学生名单（示例数据）
+const students = Array.from({length: 60}, (_,i) => `同学${String(i+1).padStart(2,'0')}`);
+
+// 完整朝代数据库
+const dynastyDB = {
+    "秦": {
+        bg: "#795548",
+        type: "cold",
+        achievements: {
+            政治: "中国首个中央集权王朝，推行郡县制",
+            经济: "统一货币和度量衡",
+            文化: "书同文，车同轨"
+        },
+        figures: {
+            "秦始皇": { 
+                info: "首位皇帝，完成华夏统一",
+                advice: "统一度量衡让交流更高效，同学们要重视标准化学习"
+            },
+            "李斯": { /* 其他人物数据 */ }
+        }
+    },
+    "汉": {
+        bg: "#FFC107",
+        type: "warm",
+        achievements: {
+            政治: "独尊儒术确立治国思想",
+            经济: "丝绸之路促进贸易繁荣", 
+            文化: "史记开创纪传体史书"
+        },
+        figures: {
+            "汉武帝": { /* 数据 */ },
+            "卫青": {
+                info: "抗击匈奴名将，官至大司马大将军",
+                advice: "少年当立报国志，但要注意团队合作才能成就大业"
+            },
+            "霍去病": {
+                info: "封狼居胥的少年将军",
+                advice: "机会总是留给有准备的人，平时积累很重要"
+            }
+        }
+    },
+    // 其他朝代数据（唐、宋等）
+    "中华人民共和国": {
+        bg: "#F44336",
+        type: "warm",
+        achievements: {
+            政治: "人民民主专政制度",
+            经济: "社会主义市场经济",
+            文化: "社会主义核心价值观"
+        },
+        figures: {
+            "邓小平": {
+                info: "改革开放总设计师",
+                advice: "教育要面向现代化，面向世界，面向未来"
+            }
+        }
+    }
+};
+
+// 抽奖逻辑
+function startLottery() {
+    let count = 0;
+    const display = document.getElementById('nameDisplay');
+    const timer = setInterval(() => {
+        display.textContent = students[Math.floor(Math.random() * students.length)];
+        if(count++ > 50) {
+            clearInterval(timer);
+            showTimeline();
+            display.innerHTML += `<div style="font-size: 0.5em;color:#666;">穿越准备就绪!</div>`;
+        }
+    }, 80);
+}
+
+// 显示历史轴线
+function showTimeline() {
+    const timeline = document.getElementById('timeline');
+    const dynasties = ["秦","汉","三国","西晋","东晋","南北朝","隋","唐","宋","元","明","清","中华人民共和国"];
+    
+    dynasties.forEach(dynasty => {
+        const era = document.createElement('div');
+        era.className = 'era-block';
+        era.style.backgroundColor = dynastyDB[dynasty]?.bg || '#ccc';
+        era.innerHTML = dynasty;
+        era.onclick = () => showDynasty(dynasty);
+        timeline.appendChild(era);
+    });
+}
+
+// 显示朝代详情
+function showDynasty(dynasty) {
+    const infoPanel = document.getElementById('dynastyInfo');
+    const data = dynastyDB[dynasty];
+    
+    // 背景颜色过渡
+    document.body.style.background = data.type === 'warm' ? 
+        'linear-gradient(120deg, #ffecd2 0%, #fcb69f 100%)' : 
+        'linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%)';
+
+    // 构建信息内容
+    let content = `<h2>${dynasty}时空</h2>`;
+    
+    // 成就面板
+    content += `<div class="achievement-section">
+                    <h3>时代成就</h3>
+                    ${Object.entries(data.achievements).map(([k,v]) => `
+                        <p><strong>${k}：</strong>${v}</p>
+                    `).join('')}
+                </div>`;
+
+    // 人物面板
+    content += `<div class="figures-section">
+                    <h3>时代先锋</h3>
+                    <div class="figure-grid">
+                        ${Object.entries(data.figures).map(([name, info]) => `
+                            <div class="figure-card" onclick="showAdvice('${name}')">
+                                <div class="figure-name">${name}</div>
+                                <div class="figure-bio">${info.info}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>`;
+
+    infoPanel.innerHTML = content;
+    infoPanel.style.display = 'block';
+}
+
+// 显示人物忠告
+function showAdvice(name) {
+    const figure = Object.values(dynastyDB).flatMap(d => 
+        Object.entries(d.figures).find(([n]) => n === name)
+    ).find(Boolean)?.[1];
+
+    if(figure?.advice) {
+        alert(`${name}的穿越忠告：\n\n"${figure.advice}"`);
+    }
+}
+</script>
+</body>
+</html>
